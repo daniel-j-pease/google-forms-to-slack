@@ -36,10 +36,10 @@ function initialize() {
 // Running the code in initialize() will cause this function to be triggered this on every Form Submit
 function submitValuesToSlack(e) {
   // Test code. uncomment to debug in Google Script editor
-  if (typeof e === "undefined") {
-    e = {values: {"Question1": ["answer1"], "Question2" : ["answer2"]}};
-    messagePretext = "Debugging our Sheets to Slack integration";
-  }
+  // if (typeof e === "undefined") {
+  //   e = {values: {"Question1": ["answer1"], "Question2" : ["answer2"]}};
+  //   messagePretext = "Debugging our Sheets to Slack integration";
+  // }
 
   var attachments = constructAttachments(e.values);
 
