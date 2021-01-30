@@ -8,15 +8,11 @@
 /////////////////////////
 
 // Alter this to match the incoming webhook url provided by Slack
-var slackIncomingWebhookUrl = 'https://hooks.slack.com/services/YOUR-URL-HERE';
+// look in yer dot env
+var slackIncomingWebhookUrl = process.env.HOOK;
+var postChannel = process.env.CHANNEL; 
 
-// Include # for public channels, omit it for private channels
-var postChannel = "YOUR-CHANNEL-HERE";
-
-var postIcon = ":mailbox_with_mail:";
-var postUser = "Form Response";
-var postColor = "#0000DD";
-
+var postColor = "#87CEEB";
 var messageFallback = "The attachment must be viewed as plain text.";
 var messagePretext = "A user submitted a response to the form.";
 
@@ -25,6 +21,7 @@ var messagePretext = "A user submitted a response to the form.";
 ///////////////////////
 
 // In the Script Editor, run initialize() at least once to make your code execute on form submit
+// NOTE: if you have any other triggers, this will delete them!
 function initialize() {
   var triggers = ScriptApp.getProjectTriggers();
   for (var i in triggers) {
@@ -39,18 +36,15 @@ function initialize() {
 // Running the code in initialize() will cause this function to be triggered this on every Form Submit
 function submitValuesToSlack(e) {
   // Test code. uncomment to debug in Google Script editor
-  // if (typeof e === "undefined") {
-  //   e = {namedValues: {"Question1": ["answer1"], "Question2" : ["answer2"]}};
-  //   messagePretext = "Debugging our Sheets to Slack integration";
-  // }
+  if (typeof e === "undefined") {
+    e = {values: {"Question1": ["answer1"], "Question2" : ["answer2"]}};
+    messagePretext = "Debugging our Sheets to Slack integration";
+  }
 
   var attachments = constructAttachments(e.values);
 
   var payload = {
     "channel": postChannel,
-    "username": postUser,
-    "icon_emoji": postIcon,
-    "link_names": 1,
     "attachments": attachments
   };
 
@@ -79,16 +73,19 @@ var constructAttachments = function(values) {
   return attachments;
 }
 
+
+
+
 // Creates an array of Slack fields containing the questions and answers
 var makeFields = function(values) {
+  
   var fields = [];
-
   var columnNames = getColumnNames();
 
   for (var i = 0; i < columnNames.length; i++) {
     var colName = columnNames[i];
-    var val = values[i];
-    fields.push(makeField(colName, val));
+    var val = values[i] || "[left blank]";
+    if (colName) fields.push(makeField(colName, val));
   }
 
   return fields;
@@ -107,7 +104,7 @@ var makeField = function(question, answer) {
 
 // Extracts the column names from the first row of the spreadsheet
 var getColumnNames = function() {
-  var sheet = SpreadsheetApp.getActiveSheet();
+  var sheet = SpreadsheetApp.getActiveSheet()
 
   // Get the header row using A1 notation
   var headerRow = sheet.getRange("1:1");
